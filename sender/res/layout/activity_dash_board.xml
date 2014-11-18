@@ -8,7 +8,8 @@
         android:id="@+id/info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world"
+        android:text="@string/hint"
+        android:hint="@string/hint"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button

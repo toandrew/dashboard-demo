@@ -172,6 +172,7 @@ public class DashBoardActivity extends ActionBarActivity {
         mSelectedDevice = device;
 
         if (mSelectedDevice != null) {
+            mSendBtn.setText(R.string.connecting);
             try {
                 disconnectApiClient();
                 connectApiClient();
@@ -301,7 +302,7 @@ public class DashBoardActivity extends ActionBarActivity {
                                     mDashBoardChannel.getNamespace(),
                                     mDashBoardChannel);
 
-                    mDashBoardChannel.show(mApiClient, mCurrentUser, mInfoBox.getText().toString());
+                    mDashBoardChannel.show(mApiClient, mCurrentUser, "Hi~");
 
                     mSendBtn.setEnabled(true);
                     mSendBtn.setText(R.string.send);
