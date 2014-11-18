@@ -15,4 +15,6 @@
     <string name="username_hint">Your name...</string>
 
     <string name="not_connected_hint">Please connect to your dongle...</string>
+    <string name="action_stop">Stop Receiver Application!</string>
+    <string name="me">me</string>
 </resources>

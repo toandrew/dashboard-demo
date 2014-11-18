@@ -2,6 +2,8 @@ package tv.matchstick.demo.dashboard;
 
 import java.io.IOException;
 
+import org.json.JSONObject;
+
 import tv.matchstick.fling.ApplicationMetadata;
 import tv.matchstick.fling.ConnectionResult;
 import tv.matchstick.fling.Fling;
@@ -163,6 +165,17 @@ public class DashBoardActivity extends ActionBarActivity {
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.action_stop:
+            stopApplication();
+            break;
+        }
+
+        return true;
+    }
+
     private class MediaRouterCallback extends MediaRouter.Callback {
         @Override
         public void onRouteSelected(MediaRouter router, RouteInfo route) {
@@ -218,7 +231,7 @@ public class DashBoardActivity extends ActionBarActivity {
                     mDashBoardChannel.leave(mApiClient, mCurrentUser);
                 }
 
-                stopApplication();
+                // stopApplication();
 
                 disconnectApiClient();
             }
@@ -363,9 +376,33 @@ public class DashBoardActivity extends ActionBarActivity {
                 String namespace, String message) {
 
             Log.d(TAG, "onTextMessageReceived: " + message);
-            String msg = mDashBoardMsgView.getText().toString() + "\n"
-                    + message;
-            mDashBoardMsgView.setText(msg);
+            try {
+                JSONObject json = new JSONObject(message);
+
+                String user;
+                if (mCurrentUser.equals(json.getString("user"))) {
+                    user = getResources().getString(R.string.me);
+                } else {
+                    user = json.getString("user");
+                }
+
+                String msg;
+
+                String type = json.getString("type");
+                if ("join".equals(type) || "leave".equals(type)) {
+                    msg = user + " " + json.getString("message") + "\n"
+                            + mDashBoardMsgView.getText().toString();
+                } else if ("say".equals(type)) {
+                    msg = user + ": " + json.getString("message") + "\n"
+                            + mDashBoardMsgView.getText().toString();
+                } else {
+                    msg = "known message" + message;
+                }
+
+                mDashBoardMsgView.setText(msg);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 }

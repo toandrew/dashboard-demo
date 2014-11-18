@@ -21,31 +21,13 @@
     <div id="textContainer">
         <div id="textMessage">DashBoard is loading...</div>
     </div>
-    <script language="JavaScript" type="text/javascript">
-        window.onload = function(evt) {
-            var textContainerElement = document.getElementById('textContainer');
-            var textMessageElement = document.getElementById('textMessage');
 
-            window.dashBoardManager = new ReceiverManagerWrapper('~dashboard');
-            var messageBus = window.dashBoardManager.createMessageBus("urn:flint:tv.matchstick.demo.dashboard");
-            messageBus.on("message", function (senderId, data) {
-                console.log('message:' + senderId + data);
-                var message = JSON.parse(data);
-                if (message.command == 'show') {
-                    textContainerElement.style.display = 'table';
-                    var text = textMessageElement.innerText + '\n'
-                    textMessageElement.innerText = text + message.user + ' says: ' + message.info;
-                    messageBus.send('{user:' + message.user + ', message:' + message.info + '}', senderId);
-                } else if (message.command == 'join') {
-                    textContainerElement.style.display = 'table';
-                    var text = textMessageElement.innerText + '\n'
-                    textMessageElement.innerText = text + message.user + ' join!';
-                    messageBus.send('{user:' + message.user + ', message:' + 'join!' + '}', senderId);
-                } else if (message.command == 'leave') {
-                    messageBus.send('{user:' + message.user + ', message:' + 'leave!' + '}', senderId);
-                }
-            });
-            window.dashBoardManager.open();
+    <script type="text/javascript" src="dashboard.js"></script>
+    <script type="text/javascript">
+        window.onload = onLoad;
+
+        function onLoad() {
+            window.dashBoard = new fling.DashBoard();
         };
     </script>
 </div>
