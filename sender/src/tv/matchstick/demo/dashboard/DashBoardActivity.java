@@ -301,11 +301,11 @@ public class DashBoardActivity extends ActionBarActivity {
                                     mDashBoardChannel.getNamespace(),
                                     mDashBoardChannel);
 
-                    mDashBoardChannel.show(mApiClient, mCurrentUser, "Hello!");
+                    mDashBoardChannel.show(mApiClient, mCurrentUser, mInfoBox.getText().toString());
 
                     mSendBtn.setEnabled(true);
                     mSendBtn.setText(R.string.send);
-                    mSendBtn.setTextColor(Color.GREEN);
+                    mSendBtn.setTextColor(Color.BLUE);
                 } catch (IOException e) {
                     Log.w(TAG, "Exception while launching application", e);
                 }

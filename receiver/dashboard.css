@@ -1,0 +1,28 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: 'FontAwesome';
+}
+
+body {
+	background-color: black;
+}
+
+#textContainer {
+	position: absolute;
+	display: none;
+	width: 100%;
+	height: 120px;
+	bottom: 0;
+	background-color: black;
+	opacity: 50%;
+	text-align: center;
+}
+
+#textMessage {
+	display: table-cell;
+	vertical-align: middle;
+	color: white;
+	font-size: 30pt;
+}
