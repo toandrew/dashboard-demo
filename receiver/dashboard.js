@@ -1,58 +1,63 @@
-// External namespace for fling specific javascript library
 var fling = window.fling || {};
 
-// Anonymous namespace
 (function() {
   'use strict';
 
-  DashBoard.PROTOCOL = 'urn:x-cast:com.infthink.cast.demo.office';
+  DashBoard.NAMESPACE = 'urn:flint:tv.matchstick.demo.dashboard';
 
-  /**
-   * Creates a FlingOffice object.
-   * @param {board} board an optional game board.
-   * @constructor
-   */
-  function FlingOffice(board) {
+  function DashBoard() {
     var self = this;
 
-    this.mBoard = board;
+    self.users = {};
 
+    self.textMessageElement = document.getElementById('text_message');
+    self.usersElement = document.getElementById('users');
+    self.systemInfoElement = document.getElementById('system_info');
 
-    console.log('********FlingOffice********');
+    console.log("init:" + self.textMessageElement.innerHTML);
 
-    this.receiverDaemon = new ReceiverManagerWrapper("~flingoffice");
-
-    var channel = this.receiverDaemon.createMessageBus("urn:x-cast:com.infthink.cast.demo.office");
-
-    //start Receiver Daemon
-    this.receiverDaemon.open();
-
-     /*
-      * Create MessageChannel Obejct
-      **/
-    channel.on("message", function(senderId, message) {
+    self.dashBoardManager = new ReceiverManagerWrapper('~dashboard');
+    self.messageBus = self.dashBoardManager.createMessageBus(DashBoard.NAMESPACE);
+    self.messageBus.on("message", function (senderId, message) {
         var data = JSON.parse(message);
-        ("onMessage" in self)&&self.onMessage(senderId, data);
+        ("onMessage" in self) && self.onMessage(senderId, data);
     });
+
+    self.messageBus.onsenderConnected = self.onSenderConnected.bind(this);
+    self.messageBus.onsenderDisconnected = self.onSenderDisconnected.bind(this);
+
+    self.dashBoardManager.open();
   }
 
-  // Adds event listening functions to FlingOffice.prototype.
-  FlingOffice.prototype = {
+  // Adds event listening functions to DashBoard.prototype.
+  DashBoard.prototype = {
 
     /**
-     * ready to fling pdf files
+     * Message received event; determines event message and command, and
+     * choose function to call based on them.
+     * @param {event} event the event to be processed.
      */
-    onFlingPdf: function(senderId, message) {
-        console.log('****flingPdf: senderId:' + senderId + ' msg:' + JSON.stringify(message));
-        this.mBoard.loadPdf(message.file);
+    onMessage: function(senderId, message) {
+        console.log('onMessage: ' + message + " senderId:" + senderId);
+
+        if (message.command == 'show') {
+            this.onShow(senderId, message);
+        } else if (message.command == 'leave') {
+            this.onLeave(senderId, message);
+        } else if (message.command == 'join') {
+            this.onJoin(senderId, message);
+        } else {
+            console.log('Invalid message command: ' + message.command);
+        }
     },
+
 
     /**
      * Sender Connected event
      * @param {event} event the sender connected event.
      */
     onSenderConnected: function(event) {
-        console.log('onSenderConnected. Total number of senders: ');
+        console.log('onSenderConnected. Total number of senders: ' + this.dashBoardManager.getSenderList());
     },
 
     /**
@@ -61,63 +66,93 @@ var fling = window.fling || {};
      * @param {event} event the sender disconnected event.
      */
     onSenderDisconnected: function(event) {
-        console.log('onSenderDisconnected. Total number of senders: ');
-    },
-
-    /**
-     * Message received event; determines event message and command, and
-     * choose function to call based on them.
-     * @param {event} event the event to be processed.
-     */
-    onMessage: function(senderId, message) {
-        console.log('********onMessage:' + message + " senderId:" + senderId);
-
-        if (message.command == 'show') {
-            this.onShow(senderId, message);
-        } else if (message.command == 'leave') {
-            this.onLeave(senderId);
-        } else if (message.command == 'page') {
-            this.onPage(senderId, message);
-        } else {
-            console.log('Invalid message command: ' + message.command);
+        console.log('onSenderDisconnected. Total number of senders: ' + this.dashBoardManager.getSenderList().length);
+        if (this.dashBoardManager.getSenderList().length == 0) {
+            window.close();
         }
     },
 
     onShow: function(senderId, message) {
-        this.onFlingPdf(senderId, message);
+        console.log('****onShow****');
+
+	this.users[senderId] = message.user;
+
+	this.showMessage('say', message.user, message.info);
+
+        this.broadcast('say', message.user, message.info);
     },
 
-    onLeave: function(senderId) {
+    onLeave: function(senderId, message) {
         console.log('****OnLeave****');
+
+	delete this.users[senderId];
+
+	this.showMessage('leave', message.user, 'left!');
+
+        this.broadcast('leave', message.user, 'left!');
     },
 
-    onPage: function(senderId, message) {
-        console.log('****onPage****');
-        if (message.cmd == 1) {   // up 
-            console.log('****onPage: up!' + document.body.scrollHeight);
-            this.mBoard.goPrevious();
-        } else if (message.cmd == 2) { //down
-            console.log('****onPage: down!' + document.body.scrollHeight);
-            this.mBoard.goNext();
-        }
-    },
+    onJoin: function(senderId, message) {
+        console.log('****onJoin****');
 
-    sendError: function(senderId, errorMessage) {
-        this.flingMessageBus_.send(senderId, {
-          'event': 'error',
-          'message': errorMessage });
+	this.users[senderId] = message.user;
+
+	this.showMessage('join', message.user, 'joined!');
+
+        this.broadcast('join', message.user, 'joined!');
     },
 
     /**
-     * Broadcasts a message to all of this object's known channels.
-     * @param {Object|string} message the message to broadcast.
+     * broadcast a message to all users on dashboard message bus.
+     *
+     * @param {string} senderId sender's Id
+     * @param {string} user the user whos send the message.
+     * @param {string} message the message to send.
      */
-    broadcast: function(message) {
-        this.flingMessageBus_.broadcast(message);
-    }
+    broadcast: function(type, user, message) {
+        this.messageBus.send('{type:' + type + ',user:' + user + ', message:' + message + '}', '*:*');
+    },
 
+    getInfoWithColor: function(info, color) {
+	console.log('<font color="' + color + '">' + info + '</font>');
+	return '<font color="' + color + '">' + info + '</font>';
+    },
+
+    updateUsers: function(activeUser) {
+        var senderIds = this.dashBoardManager.getSenderList();
+        var userNames = null;
+        for (var senderId in senderIds) {
+           var user = this.users[senderId];
+	   if (user == activeUser) {
+              user = this.getInfoWithColor(user, 'red');
+           }
+	   if (userNames == null) {
+               userNames = user; 
+           } else {
+               userNames = user + ',' + userNames; 
+           }
+        }
+
+	this.usersElement.innerHTML = userNames;
+    },
+
+    showMessage: function(type, user, info) {
+	var myDate = new Date();
+
+
+	if (type == 'say') {
+        	this.textMessageElement.innerHTML = '<br>' + this.getInfoWithColor(info, 'blue') + '<br>';
+
+	        this.systemInfoElement.innerHTML = this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor('is talking', 'blue')  + ' on '+ myDate.toLocaleString();
+	} else if (type == 'join' || type == 'leave') {
+        	this.textMessageElement.innerHTML = '<br>' + this.getInfoWithColor(user,'red') + ' ' + this.getInfoWithColor(info, 'blue') + '<br>';
+	        this.systemInfoElement.innerHTML = this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor(info, 'blue')  + ' on '+ myDate.toLocaleString();
+	} 
+
+        this.updateUsers(user);
+    }
   };
 
   // Exposes public functions and APIs
-  fling.FlingOffice = FlingOffice;
+  fling.DashBoard = DashBoard;
 })();
