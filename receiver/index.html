@@ -33,7 +33,7 @@
                 var message = JSON.parse(data);
                 if (message.command == 'show') {
                     textContainerElement.style.display = 'table';
-                    textMessageElement.innerText = message.user + '(' + senderId + ')' + ' says: ' + message.info;
+                    textMessageElement.innerText = message.user + ' says: ' + message.info;
                 }
             });
             window.dashBoardManager.open();

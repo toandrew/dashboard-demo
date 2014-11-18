@@ -35,6 +35,7 @@ public class DashBoardActivity extends ActionBarActivity {
 
     private Button mSendBtn;
     private EditText mInfoBox;
+    private EditText mUserBox;
 
     private String mCurrentUser;
 
@@ -71,6 +72,7 @@ public class DashBoardActivity extends ActionBarActivity {
         mConnectionCallbacks = new ConnectionCallbacks();
         mConnectionFailedListener = new ConnectionFailedListener();
 
+        mUserBox = (EditText) findViewById(R.id.user);
         mInfoBox = (EditText) findViewById(R.id.info);
         mSendBtn = (Button) findViewById(R.id.sendBtn);
         mSendBtn.setOnClickListener(new OnClickListener() {
@@ -79,6 +81,10 @@ public class DashBoardActivity extends ActionBarActivity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 if (mApiClient != null && mApiClient.isConnected()) {
+                    mCurrentUser = mUserBox.getText().toString();
+                    if (mCurrentUser.isEmpty()) {
+                        mCurrentUser = "Guest";
+                    }
                     sendMessage(mInfoBox.getText().toString());
                 }
             }
@@ -87,7 +93,7 @@ public class DashBoardActivity extends ActionBarActivity {
 
         mSendBtn.setEnabled(false);
 
-        mCurrentUser = "guest";
+        mCurrentUser = "Guest";
     }
 
     @Override

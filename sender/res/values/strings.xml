@@ -9,5 +9,8 @@
     <string name="not_connected">Not connected</string>
     <string name="connecting">Connecting...</string>
     <string name="send">Send it!</string>
-    <string name="hint">Hi~</string>
+    <string name="message">Hi~</string>
+    <string name="hint">Your message...</string>
+    <string name="user">User Name: </string>
+    <string name="username_hint">Your name...</string>
 </resources>
