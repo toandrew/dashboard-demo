@@ -16,10 +16,10 @@ var fling = window.fling || {};
     self.messageBus.on("message", function (senderId, message) {
         var data = JSON.parse(message);
         ("onMessage" in self) && self.onMessage(senderId, data);
-    }
+    });
 
     self.messageBus.onsenderConnected = self.onSenderConnected.bind(this);
-    self.messageBus.onSenderDisconnected = self.onSenderDisconnected.bind(this);
+    self.messageBus.onsenderDisonnected = self.onSenderDisconnected.bind(this);
   }
 
   // Adds event listening functions to DashBoard.prototype.
