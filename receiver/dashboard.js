@@ -20,6 +20,8 @@ var fling = window.fling || {};
 
     self.messageBus.onsenderConnected = self.onSenderConnected.bind(this);
     self.messageBus.onsenderDisonnected = self.onSenderDisconnected.bind(this);
+
+    self.dashBoardManager.open();
   }
 
   // Adds event listening functions to DashBoard.prototype.
