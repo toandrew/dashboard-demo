@@ -6,5 +6,6 @@
 
     <string name="media_route_menu_title">Play on&#8230;</string>
     
-    <string name="send">Send</string>
+    <string name="not_connected">Not connected</string>
+    <string name="send">Send it!</string>
 </resources>

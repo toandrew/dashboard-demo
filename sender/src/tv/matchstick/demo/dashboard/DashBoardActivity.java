@@ -11,10 +11,11 @@ import tv.matchstick.fling.FlingManager;
 import tv.matchstick.fling.FlingMediaControlIntent;
 import tv.matchstick.fling.ResultCallback;
 import tv.matchstick.fling.Status;
-import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
@@ -27,10 +28,10 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class DashBoardActivity extends Activity {
+public class DashBoardActivity extends ActionBarActivity {
     private static final String TAG = "MyDashBoardDemo";
 
-    private static final String APP_URL = "http://toandrew.github.io/dashboard/receiver/index.html";
+    private static final String APP_URL = "http://toandrew.github.io/dashboard-demo/receiver/index.html";
 
     private Button mSendBtn;
     private EditText mInfoBox;
@@ -179,6 +180,8 @@ public class DashBoardActivity extends Activity {
                 disconnectApiClient();
 
                 mSendBtn.setEnabled(false);
+                mSendBtn.setText(R.string.not_connected);
+                mSendBtn.setTextColor(Color.RED);
             }
         } else {
             if (mApiClient != null) {
@@ -194,6 +197,8 @@ public class DashBoardActivity extends Activity {
             mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
 
             mSendBtn.setEnabled(false);
+            mSendBtn.setText(R.string.not_connected);
+            mSendBtn.setTextColor(Color.RED);
         }
     }
 
@@ -299,6 +304,8 @@ public class DashBoardActivity extends Activity {
                     mDashBoardChannel.show(mApiClient, mCurrentUser, "Hello!");
 
                     mSendBtn.setEnabled(true);
+                    mSendBtn.setText(R.string.send);
+                    mSendBtn.setTextColor(Color.GREEN);
                 } catch (IOException e) {
                     Log.w(TAG, "Exception while launching application", e);
                 }
@@ -308,6 +315,8 @@ public class DashBoardActivity extends Activity {
                                 + status.getStatusCode());
 
                 mSendBtn.setEnabled(false);
+                mSendBtn.setText(R.string.not_connected);
+                mSendBtn.setTextColor(Color.RED);
             }
         }
     }

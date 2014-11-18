@@ -6,14 +6,21 @@
 
     <EditText
         android:id="@+id/info"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:text="@string/hello_world"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
         android:id="@+id/sendBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/send" />
+        android:layout_centerInParent="true"
+        android:background="@drawable/remote_button_bg"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip"
+        android:textColor="#FF0000"
+        android:text="@string/not_connected"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>
