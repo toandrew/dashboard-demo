@@ -19,7 +19,7 @@
 
 <body>
     <div id="textContainer">
-        <div id="textMessage">App is loading...</div>
+        <div id="textMessage">DashBoard is loading...</div>
     </div>
     <script language="JavaScript" type="text/javascript">
         window.onload = function(evt) {
@@ -33,7 +33,16 @@
                 var message = JSON.parse(data);
                 if (message.command == 'show') {
                     textContainerElement.style.display = 'table';
-                    textMessageElement.innerText = message.user + ' says: ' + message.info;
+                    var text = textMessageElement.innerText + '\n'
+                    textMessageElement.innerText = text + message.user + ' says: ' + message.info;
+                    messageBus.send('{user:' + message.user + ', message:' + message.info + '}', senderId);
+                } else if (message.command == 'join') {
+                    textContainerElement.style.display = 'table';
+                    var text = textMessageElement.innerText + '\n'
+                    textMessageElement.innerText = text + message.user + ' join!';
+                    messageBus.send('{user:' + message.user + ', message:' + 'join!' + '}', senderId);
+                } else if (message.command == 'leave') {
+                    messageBus.send('{user:' + message.user + ', message:' + 'leave!' + '}', senderId);
                 }
             });
             window.dashBoardManager.open();

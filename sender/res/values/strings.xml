@@ -13,4 +13,6 @@
     <string name="hint">Your message...</string>
     <string name="user">User Name: </string>
     <string name="username_hint">Your name...</string>
+
+    <string name="not_connected_hint">Please connect to your dongle...</string>
 </resources>

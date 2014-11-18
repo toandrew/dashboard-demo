@@ -11,6 +11,7 @@ import tv.matchstick.fling.FlingManager;
 import tv.matchstick.fling.FlingMediaControlIntent;
 import tv.matchstick.fling.ResultCallback;
 import tv.matchstick.fling.Status;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,6 +28,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class DashBoardActivity extends ActionBarActivity {
     private static final String TAG = "MyDashBoardDemo";
@@ -36,6 +39,7 @@ public class DashBoardActivity extends ActionBarActivity {
     private Button mSendBtn;
     private EditText mInfoBox;
     private EditText mUserBox;
+    private TextView mDashBoardMsgView;
 
     private String mCurrentUser;
 
@@ -51,15 +55,31 @@ public class DashBoardActivity extends ActionBarActivity {
 
     private Handler mHandler = new Handler();
 
+    private Context mContext;
+
+    private Toast mToast;
+
+    public void showToast(String text) {
+        if (mToast == null) {
+            mToast = Toast.makeText(mContext, text, Toast.LENGTH_SHORT);
+        } else {
+            mToast.setText(text);
+        }
+
+        mToast.show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dash_board);
 
+        mContext = this;
+
         String APPLICATION_ID = "~dashboard";
         Fling.FlingApi.setApplicationId(APPLICATION_ID);
 
-        mDashBoardChannel = new DashBoardChannel();
+        mDashBoardChannel = new MyDashBoardChannel();
 
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         mMediaRouteSelector = new MediaRouteSelector.Builder()
@@ -86,12 +106,15 @@ public class DashBoardActivity extends ActionBarActivity {
                         mCurrentUser = "Guest";
                     }
                     sendMessage(mInfoBox.getText().toString());
+                } else {
+                    showToast(getResources().getString(
+                            R.string.not_connected_hint));
                 }
             }
 
         });
 
-        mSendBtn.setEnabled(false);
+        mDashBoardMsgView = (TextView) findViewById(R.id.text_view);
 
         mCurrentUser = "Guest";
     }
@@ -186,7 +209,6 @@ public class DashBoardActivity extends ActionBarActivity {
                 Log.w(TAG, "Exception while connecting API client", e);
                 disconnectApiClient();
 
-                mSendBtn.setEnabled(false);
                 mSendBtn.setText(R.string.not_connected);
                 mSendBtn.setTextColor(Color.RED);
             }
@@ -203,7 +225,6 @@ public class DashBoardActivity extends ActionBarActivity {
 
             mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
 
-            mSendBtn.setEnabled(false);
             mSendBtn.setText(R.string.not_connected);
             mSendBtn.setTextColor(Color.RED);
         }
@@ -308,9 +329,8 @@ public class DashBoardActivity extends ActionBarActivity {
                                     mDashBoardChannel.getNamespace(),
                                     mDashBoardChannel);
 
-                    mDashBoardChannel.show(mApiClient, mCurrentUser, "Hi~");
+                    mDashBoardChannel.join(mApiClient, mCurrentUser);
 
-                    mSendBtn.setEnabled(true);
                     mSendBtn.setText(R.string.send);
                     mSendBtn.setTextColor(Color.BLUE);
                 } catch (IOException e) {
@@ -321,7 +341,6 @@ public class DashBoardActivity extends ActionBarActivity {
                         "ConnectionResultCallback. Unable to launch the game. statusCode: "
                                 + status.getStatusCode());
 
-                mSendBtn.setEnabled(false);
                 mSendBtn.setText(R.string.not_connected);
                 mSendBtn.setTextColor(Color.RED);
             }
@@ -338,4 +357,15 @@ public class DashBoardActivity extends ActionBarActivity {
             }
         });
     }
+
+    private class MyDashBoardChannel extends DashBoardChannel {
+        public void onMessageReceived(FlingDevice flingDevice,
+                String namespace, String message) {
+
+            Log.d(TAG, "onTextMessageReceived: " + message);
+            String msg = mDashBoardMsgView.getText().toString() + "\n"
+                    + message;
+            mDashBoardMsgView.setText(msg);
+        }
+    };
 }

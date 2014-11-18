@@ -10,13 +10,14 @@ import tv.matchstick.fling.ResultCallback;
 import tv.matchstick.fling.Status;
 import android.util.Log;
 
-public class DashBoardChannel implements Fling.MessageReceivedCallback {
+public abstract class DashBoardChannel implements Fling.MessageReceivedCallback {
     private static final String TAG = DashBoardChannel.class.getSimpleName();
 
     private static final String DASHBOARD_NAMESPACE = "urn:flint:tv.matchstick.demo.dashboard";
 
     // Commands
     private static final String KEY_COMMAND = "command";
+    private static final String KEY_JOIN = "join";
     private static final String KEY_SHOW = "show";
     private static final String KEY_LEAVE = "leave";
 
@@ -40,6 +41,18 @@ public class DashBoardChannel implements Fling.MessageReceivedCallback {
             payload.put(KEY_COMMAND, KEY_SHOW);
             payload.put(KEY_USER, user);
             payload.put(KEY_INFO, info);
+            sendMessage(apiClient, payload.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, "Cannot create object to show file", e);
+        }
+    }
+
+    public final void join(FlingManager apiClient, String user) {
+        try {
+            Log.d(TAG, "join: " + user);
+            JSONObject payload = new JSONObject();
+            payload.put(KEY_COMMAND, KEY_JOIN);
+            payload.put(KEY_USER, user);
             sendMessage(apiClient, payload.toString());
         } catch (JSONException e) {
             Log.e(TAG, "Cannot create object to show file", e);
