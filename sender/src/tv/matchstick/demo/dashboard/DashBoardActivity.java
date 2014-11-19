@@ -37,13 +37,10 @@ public class DashBoardActivity extends ActionBarActivity {
     private static final String TAG = "MyDashBoardDemo";
 
     private static final String APP_URL = "http://toandrew.github.io/dashboard-demo/receiver/index.html";
-
     private Button mSendBtn;
     private EditText mInfoBox;
     private EditText mUserBox;
     private TextView mDashBoardMsgView;
-
-    private String mCurrentUser;
 
     private FlingDevice mSelectedDevice;
     private FlingManager mApiClient;
@@ -103,10 +100,6 @@ public class DashBoardActivity extends ActionBarActivity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 if (mApiClient != null && mApiClient.isConnected()) {
-                    mCurrentUser = mUserBox.getText().toString();
-                    if (mCurrentUser.isEmpty()) {
-                        mCurrentUser = "Guest";
-                    }
                     sendMessage(mInfoBox.getText().toString());
                 } else {
                     showToast(getResources().getString(
@@ -117,8 +110,6 @@ public class DashBoardActivity extends ActionBarActivity {
         });
 
         mDashBoardMsgView = (TextView) findViewById(R.id.text_view);
-
-        mCurrentUser = "Guest";
     }
 
     @Override
@@ -228,7 +219,7 @@ public class DashBoardActivity extends ActionBarActivity {
         } else {
             if (mApiClient != null) {
                 if (mApiClient.isConnected()) {
-                    mDashBoardChannel.leave(mApiClient, mCurrentUser);
+                    mDashBoardChannel.leave(mApiClient, getCurrentUser());
                 }
 
                 // stopApplication();
@@ -342,7 +333,7 @@ public class DashBoardActivity extends ActionBarActivity {
                                     mDashBoardChannel.getNamespace(),
                                     mDashBoardChannel);
 
-                    mDashBoardChannel.join(mApiClient, mCurrentUser);
+                    mDashBoardChannel.join(mApiClient, getCurrentUser());
 
                     mSendBtn.setText(R.string.send);
                     mSendBtn.setTextColor(Color.BLUE);
@@ -365,7 +356,7 @@ public class DashBoardActivity extends ActionBarActivity {
             @Override
             public void run() {
                 if (mDashBoardChannel != null) {
-                    mDashBoardChannel.show(mApiClient, mCurrentUser, hello);
+                    mDashBoardChannel.show(mApiClient, getCurrentUser(), hello);
                 }
             }
         });
@@ -380,7 +371,7 @@ public class DashBoardActivity extends ActionBarActivity {
                 JSONObject json = new JSONObject(message);
 
                 String user;
-                if (mCurrentUser.equals(json.getString("user"))) {
+                if (getCurrentUser().equals(json.getString("user")) && !getCurrentUser().equals("Guest")) {
                     user = getResources().getString(R.string.me);
                 } else {
                     user = json.getString("user");
@@ -405,4 +396,13 @@ public class DashBoardActivity extends ActionBarActivity {
             }
         }
     };
+
+    private String getCurrentUser() {
+        String user = mUserBox.getText().toString();
+        if (user.isEmpty()) {
+            user = "Guest";
+        }
+        
+        return user;
+    }
 }

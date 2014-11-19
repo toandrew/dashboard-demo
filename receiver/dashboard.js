@@ -8,8 +8,13 @@ var fling = window.fling || {};
   function DashBoard() {
     var self = this;
 
-    self.textContainerElement = document.getElementById('textContainer');
-    self.textMessageElement = document.getElementById('textMessage');
+    self.users = {};
+
+    self.textMessageElement = document.getElementById('text_message');
+    self.usersElement = document.getElementById('users');
+    self.systemInfoElement = document.getElementById('system_info');
+
+    console.log("init:" + self.textMessageElement.innerHTML);
 
     self.dashBoardManager = new ReceiverManagerWrapper('~dashboard');
     self.messageBus = self.dashBoardManager.createMessageBus(DashBoard.NAMESPACE);
@@ -19,7 +24,7 @@ var fling = window.fling || {};
     });
 
     self.messageBus.onsenderConnected = self.onSenderConnected.bind(this);
-    self.messageBus.onsenderDisonnected = self.onSenderDisconnected.bind(this);
+    self.messageBus.onsenderDisconnected = self.onSenderDisconnected.bind(this);
 
     self.dashBoardManager.open();
   }
@@ -52,7 +57,7 @@ var fling = window.fling || {};
      * @param {event} event the sender connected event.
      */
     onSenderConnected: function(event) {
-        console.log('onSenderConnected. Total number of senders: ' + this.dashBoardManager.getSenderList().length);
+        console.log('onSenderConnected. Total number of senders: ' + this.dashBoardManager.getSenderList());
     },
 
     /**
@@ -69,22 +74,32 @@ var fling = window.fling || {};
 
     onShow: function(senderId, message) {
         console.log('****onShow****');
-        var text = this.textMessageElement.innerText + '\n'
-        this.textMessageElement.innerText = text + message.user + ': ' + message.info;
 
-        this.broadcast(senderId, 'say', message.user, message.info);
+	this.users[senderId] = message.user;
+
+	this.showMessage('say', message.user, message.info);
+
+        this.broadcast('say', message.user, message.info);
     },
 
     onLeave: function(senderId, message) {
         console.log('****OnLeave****');
 
-        this.broadcast(senderId, 'leave', message.user, 'leave!');
+	delete this.users[senderId];
+
+	this.showMessage('leave', message.user, 'left!');
+
+        this.broadcast('leave', message.user, 'left!');
     },
 
     onJoin: function(senderId, message) {
         console.log('****onJoin****');
 
-        this.broadcast(senderId, 'join', message.user, 'join!');
+	this.users[senderId] = message.user;
+
+	this.showMessage('join', message.user, 'joined!');
+
+        this.broadcast('join', message.user, 'joined!');
     },
 
     /**
@@ -94,10 +109,48 @@ var fling = window.fling || {};
      * @param {string} user the user whos send the message.
      * @param {string} message the message to send.
      */
-    broadcast: function(senderId, type, user, message) {
-        this.messageBus.send('{type:' + type + ',user:' + user + ', message:' + message + '}', senderId);
-    }
+    broadcast: function(type, user, message) {
+        this.messageBus.send('{type:' + type + ',user:' + user + ', message:' + message + '}', '*:*');
+    },
 
+    getInfoWithColor: function(info, color) {
+	console.log('<font color="' + color + '">' + info + '</font>');
+	return '<font color="' + color + '">' + info + '</font>';
+    },
+
+    updateUsers: function(activeUser) {
+        var senderIds = this.dashBoardManager.getSenderList();
+        var userNames = null;
+        for (var senderId in senderIds) {
+           var user = this.users[senderId];
+	   if (user == activeUser) {
+              user = this.getInfoWithColor(user, 'red');
+           }
+	   if (userNames == null) {
+               userNames = user; 
+           } else {
+               userNames = user + ',' + userNames; 
+           }
+        }
+
+	this.usersElement.innerHTML = userNames;
+    },
+
+    showMessage: function(type, user, info) {
+	var myDate = new Date();
+
+
+	if (type == 'say') {
+        	this.textMessageElement.innerHTML = '<br>' + this.getInfoWithColor(info, 'blue') + '<br>';
+
+	        this.systemInfoElement.innerHTML = this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor('is talking', 'blue')  + ' on '+ myDate.toLocaleString();
+	} else if (type == 'join' || type == 'leave') {
+        	this.textMessageElement.innerHTML = '<br>' + this.getInfoWithColor(user,'red') + ' ' + this.getInfoWithColor(info, 'blue') + '<br>';
+	        this.systemInfoElement.innerHTML = this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor(info, 'blue')  + ' on '+ myDate.toLocaleString();
+	} 
+
+        this.updateUsers(user);
+    }
   };
 
   // Exposes public functions and APIs
