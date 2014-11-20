@@ -4,31 +4,12 @@
     android:layout_height="match_parent"
     tools:context="${relativePackage}.${activityClass}" >
 
-    <TextView
-        android:id="@+id/lable"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dip"
-        android:text="@string/user"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <EditText
-        android:id="@+id/user"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/lable"
-        android:layout_toRightOf="@id/lable"
-        android:hint="@string/username_hint"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <Button
         android:id="@+id/sendBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/lable"
         android:layout_marginRight="10dip"
-        android:layout_marginTop="10dip"
         android:background="@drawable/remote_button_bg"
         android:paddingLeft="10dip"
         android:paddingRight="10dip"
@@ -36,12 +17,22 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FF0000" />
 
+    <EditText
+        android:id="@+id/user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/sendBtn"
+        android:layout_marginTop="10dip"
+        android:layout_toLeftOf="@id/sendBtn"
+        android:hint="@string/username_hint"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
     <ImageView
         android:id="@+id/line"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/user"
-        android:layout_marginTop="20dip"
+        android:layout_marginTop="0dip"
         android:src="@drawable/line" />
 
     <EditText
@@ -52,8 +43,7 @@
         android:gravity="left|top"
         android:hint="@string/hint"
         android:inputType="textMultiLine"
-        android:minLines="2"
-        android:text="@string/message"
+        android:minLines="6"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ScrollView

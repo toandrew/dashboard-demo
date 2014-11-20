@@ -37,6 +37,7 @@ public class DashBoardActivity extends ActionBarActivity {
     private static final String TAG = "MyDashBoardDemo";
 
     private static final String APP_URL = "http://toandrew.github.io/dashboard-demo/receiver/index.html";
+ 
     private Button mSendBtn;
     private EditText mInfoBox;
     private EditText mUserBox;
@@ -186,7 +187,7 @@ public class DashBoardActivity extends ActionBarActivity {
      * Stop receiver application.
      */
     public void stopApplication() {
-        if (!mApiClient.isConnected()) {
+        if (mApiClient == null || !mApiClient.isConnected()) {
             return;
         }
 
@@ -372,7 +373,8 @@ public class DashBoardActivity extends ActionBarActivity {
                 JSONObject json = new JSONObject(message);
 
                 String user;
-                if (getCurrentUser().equals(json.getString("user")) && !getCurrentUser().equals("Guest")) {
+                if (getCurrentUser().equals(json.getString("user"))
+                        && !getCurrentUser().equals("Guest")) {
                     user = getResources().getString(R.string.me);
                 } else {
                     user = json.getString("user");
@@ -398,12 +400,22 @@ public class DashBoardActivity extends ActionBarActivity {
         }
     };
 
+    private String getRandomGuestName() {
+        String name = "guest";
+        for (int i = 0; i < 4; i++) {
+            name += (int) Math.floor(Math.random() * 10);
+        }
+
+        return name;
+    }
+
     private String getCurrentUser() {
         String user = mUserBox.getText().toString();
         if (user.isEmpty()) {
-            user = "Guest";
+            user = getRandomGuestName();
+            mUserBox.setText(user);
         }
-        
+
         return user;
     }
 }
