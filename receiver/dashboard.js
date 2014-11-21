@@ -9,13 +9,23 @@ var fling = window.fling || {};
     function DashBoard() {
         var self = this;
 
+        // all users
         self.users = {};
 
-        self.textMessageElement = document.getElementById('text_message');
-        self.usersElement = document.getElementById('users');
-        self.systemInfoElement = document.getElementById('system_info');
+        // all user colors
+        self.userColors = {};
 
-        console.log("init:" + self.textMessageElement.innerHTML);
+        // all info colors
+        self.infoColors = {};
+
+        // message box total height
+        self.textContainerHeight = 0;
+
+        // message item height
+        self.textItemHeight = 0;
+
+        // set default message container's height
+	    self.setTextMessageBoxHeight();
 
         // create Recerver manager object which can be used to send messages through messagebus.
         self.dashBoardManager = new ReceiverManagerWrapper('~dashboard');
@@ -152,6 +162,34 @@ var fling = window.fling || {};
         },
 
         /**
+         * Get the specific user color
+         *
+         * @param {string} user the specific user
+         */
+        getUserColor: function(user) {
+           var color = this.userColors[user];
+           if (color == null || typeof(color) == "undefined") {
+              this.userColors[user] = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6); // random color
+           }
+
+	       return this.userColors[user];
+        },
+
+        /**
+         * Get the specific info color
+         *
+         * @param {string} user the specific user
+         */
+        getInfoColor: function(user) {
+           var color = this.infoColors[user];
+           if (color == null || typeof(color) == "undefined") {
+              this.infoColors[user] = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6); // random color
+           }
+
+	       return this.infoColors[user];
+        },
+
+        /**
          * Update user list according to current senders
          *
          * @param {string} activeUser user who is talking now
@@ -167,12 +205,12 @@ var fling = window.fling || {};
                 if (userNames == null) {
                     userNames = user;
                 } else {
-                    userNames = user + ',' + userNames;
+                    userNames = user + ', ' + userNames;
                 }
             }
 
             if (userNames != null) {
-                this.usersElement.innerHTML = userNames;
+                $("#users").html(userNames);
             }
         },
 
@@ -187,16 +225,52 @@ var fling = window.fling || {};
             var myDate = new Date();
 
             if (type == 'say') {
-                this.textMessageElement.innerHTML = '<br>' + this.getInfoWithColor(info, 'blue') + '<br>';
-                this.systemInfoElement.innerHTML = this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor('is talking', 'blue') + ' on ' + myDate.toLocaleString();
-                this.textMessageElement.scrollTop = this.textMessageElement.scrollHeight;
+                $('#system_info').html(this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor('is talking', 'blue') + ' on ' + myDate.toLocaleString());
+
+                // ready to insert one li item?
+		        var item_num = $("#text_message li").length;
+                if (item_num * self.textItemHeight >= self.textContainerHeight) { // all item's height > totoal height?
+                    this.doScroll();
+                }
+
+		        var li = $("<li>" + "(" + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds() + ")"+ this.getInfoWithColor(user, this.getUserColor(user)) + ': ' + this.getInfoWithColor(info, this.getInfoColor(user)) + "</li>");
+                $("#text_message").append(li);
             } else if (type == 'join' || type == 'leave') {
-                this.textMessageElement.innerHTML = '<br>' + this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor(info, 'blue') + '<br>';
-                this.systemInfoElement.innerHTML = this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor(info, 'blue') + ' on ' + myDate.toLocaleString();
-                this.textMessageElement.scrollTop = this.textMessageElement.scrollHeight;
+                $('#system_info').html(this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor(info, 'blue') + ' on ' + myDate.toLocaleString());
+
+                // ready to insert one li item?
+		        var item_num = $("#text_message li").length;
+                if (item_num * self.textItemHeight >= self.textContainerHeight) { // all item's height > totoal height?
+                    this.doScroll();
+                }
+
+		        var li = $("<li>" + this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor(info, 'blue') + "</li>");
+                $("#text_message").append(li);
             }
 
+            // update current user's status.
             this.updateUsers(user);
+        },
+
+        /**
+         * do scroll to remove the first item.
+         */
+	    doScroll: function (obj) {
+	    $("#text_container").find("#text_message").animate({
+                marginTop : "-" + self.textItemHeight + "px"   // item height
+              },500,function(){
+                $(this).css({marginTop : "0px"}).find("li:first").remove();
+            });
+        },
+
+        /**
+         * set message box's height
+         */
+        setTextMessageBoxHeight: function() {
+            self.textItemHeight = $("#text_message").outerHeight();
+            self.textContainerHeight = parseInt((($(window).height() - $("#user_list_id").outerHeight() - $("#system_info").outerHeight() - $("#top_split_line").outerHeight() - $("#bottom_split_line").outerHeight() - ($(window).height()*0.03))/$("#text_message").outerHeight()))*$("#text_message").outerHeight();
+            console.log("messagebox:" + self.textContainerHeight);
+            $("#text_container").height(self.textContainerHeight);
         }
     };
 
