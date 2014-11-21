@@ -233,7 +233,7 @@ var fling = window.fling || {};
                     this.doScroll();
                 }
 
-		        var li = $("<li>" + "(" + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds() + ")"+ this.getInfoWithColor(user, this.getUserColor(user)) + ': ' + this.getInfoWithColor(info, this.getInfoColor(user)) + "</li>");
+		        var li = $("<li>" + this.getInfoWithColor(user, this.getUserColor(user)) + ': ' + this.getInfoWithColor(info, this.getInfoColor(user)) + "</li>");
                 $("#text_message").append(li);
             } else if (type == 'join' || type == 'leave') {
                 $('#system_info').html(this.getInfoWithColor(user, 'red') + ' ' + this.getInfoWithColor(info, 'blue') + ' on ' + myDate.toLocaleString());
